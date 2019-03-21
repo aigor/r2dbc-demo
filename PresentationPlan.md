@@ -49,7 +49,7 @@ Teach the audience to work with reactive database access (R2DBC).
   - The aim of the project & the story behind the ADBA vs R2DBC battle
   - A short introduction to R2DBC ecosystem: R2DBC API, R2DBC Client, available drivers
   - A short explanation of how reactive Spring Data uses R2DBC (similar to how reactive Mongo repositories work)
-  - A short list of R2DBC Issues: not mature enough, maybe beaten by ADBA, reactive approach may not fix SQL databases at all
+  - A short list of R2DBC Issues: not mature enough, maybe beaten by ADBA, reactive approach may not fit SQL databases at all
 - Describing on slides the plan how we are going to implement the R2DBC driver for PrestoDB (5 min)
   - Lightning fast into to PrestoDB
   - Lisghtning fast description of PrestoDB HTTP API for querying data with SQL
