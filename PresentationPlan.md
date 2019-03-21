@@ -65,7 +65,7 @@ Teach the audience to work with reactive database access (R2DBC).
 - Demoing the application that uses the `r2dbc-presto` driver (5 min)
   - Showing synchronous application which uses an official JDBC driver for accessing data
   - The same application uses our R2DBC driver for accessing data
-  - Comparing resource consumption between synch and async approach (allocated memory, blocked threads)
+  - Comparing resource consumption between synch and async applications (allocated memory, blocked threads)
 - Summary (2 min)
   - Sharing useful links
 - Q&A (5 min)
