@@ -1,2 +1,3 @@
-# r2dbc-presto
-Demo R2DBC driver for PrestoDB
+# Demo R2DBC web-application
+
+Prepared for JEEConf 2019
