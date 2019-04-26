@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- External styles -->
+    <link href="js/app.css" media="screen" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <!-- JQVMap -->
+    <link href="js/jqvmap.css" media="screen" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="js/jquery.vmap.js"></script>
+    <script type="text/javascript" src="js/maps/jquery.vmap.usa.districts.js"></script>
+    <!-- JQVMap -->
+
+    <title>JDBC vs R2DBC</title>
+</head>
+<body style="margin: 0; font-family: Verdana; font-size: medium; background-color: #a5bfdd;">
+
+<div class="status-block" style="background-color: lightgray; padding: 0em 1em 1em 1em; margin: 0;">
+    <div>
+        <select id="scenario" onchange="selectScenario(this)">
+            <option value="usa-districts-jdbc">USA sales (JDBC)</option>
+            <option value="usa-districts-r2dbc">USA sales (R2DBC)</option>
+        </select>
+    </div>
+    <div>
+        <p style="padding-left: 1em;">JDBC:</p>
+    </div>
+    <div class="pool-status w3-green">
+        <div id="jdbc-pool-usage-progress" class="w3-red w3-center" style="width:0">
+            <a id="jdbc-pool-usage" style="padding-left: 16px;">0/0</a>
+        </div>
+    </div>
+    <div class="jdbc-pool-queue">
+        <p>queue: <b><a id="jdbc-pool-queue-size">0</a></b></p>
+    </div>
+
+    <div>
+        <p style="padding-left: 1.5em;">R2DBC:</p>
+    </div>
+    <div class="pool-status w3-green">
+        <div id="r2dbc-pool-usage-progress" class="w3-red w3-center" style="width:0">
+            <a id="r2dbc-pool-usage" style="padding-left: 16px;">0/0</a>
+        </div>
+    </div>
+    <div class="r2dbc-pool-queue">
+        <p>queue: <b><a id="r2dbc-pool-queue-size">0</a></b></p>
+    </div>
+
+    <div class="pool-queue">
+        <p>serving req: <a id="active-req">0</a></p>
+    </div>
+</div>
+
+<div id="vmap-container" align="center">
+    <div id="vmap" style="width: 1440px; height: 740px;"></div>
+</div>
+
+<script>
+    const timout = 2000;
+
+    var active_colors = { };
+    var active_pins = { };
+    var active_data = { };
+
+    var vMap = initVectorMap('usa-districts-jdbc', 'usa_districts_en', false, timout, true);
+
+    function selectScenario(scenario) {
+        // Available maps:
+        // 'usa_districts_en'
+
+        let newScenario = scenario.value;
+        console.log("New scenario selected: " + newScenario);
+
+        if (newScenario === "usa-districts-jdbc" || newScenario === "usa-districts-r2dbc") {
+            vMap = initVectorMap(newScenario, 'usa_districts_en', true, timout, false);
+        }
+    }
+
+    const rgbToHex = function (rgb) {
+        let hex = Number(rgb).toString(16);
+        if (hex.length < 2) {
+            hex = "0" + hex;
+        }
+        return hex;
+    };
+
+    const fullColorHex = function (r, g, b) {
+        return '#' + rgbToHex(r) + rgbToHex(g) + rgbToHex(b);
+    };
+
+    function setRegionColor(code, color) {
+        active_colors[code] = color;
+        vMap.vectorMap('set', 'colors', active_colors);
+    }
+
+    function unsetRegionColor(code) {
+        delete active_colors[code];
+        vMap.vectorMap('set', 'colors', active_colors);
+    }
+
+    function setData(code, data) {
+        active_data[code] = data;
+        vMap.vectorMap('set', 'values', active_data);
+    }
+
+    function setRegionPin(code, text) {
+        active_pins[code] = text;
+        vMap.vectorMap('placePins', active_pins, 'content');
+    }
+
+    function initVectorMap(study, mapName, async, timeout, firstInit) {
+        active_colors = { };
+        active_pins = { };
+        active_data = { };
+
+        let vMap = jQuery('#vmap');
+
+        if (!firstInit) {
+            vMap.vectorMap('set', 'colors', active_colors);
+            vMap.vectorMap('placePins', active_pins, 'content');
+            vMap.off();
+            vMap.empty();
+        }
+
+        const waitingColor = '#cccccc';
+        vMap.vectorMap({
+            map: mapName,
+            backgroundColor: '#a5bfdd',
+            hoverOpacity: 0.7,
+
+            selectedColor: waitingColor,
+
+            borderColor: '#818181',
+            borderOpacity: 0.25,
+            borderWidth: 1,
+
+            enableZoom: false,
+            showTooltip: true,
+
+            values: active_data,
+            scaleColors: ['#ee4477', '#550000'],
+
+            normalizeFunction: 'linear',
+
+            onLoad: function(event, map) {
+                // TODO: store all loaded regions & add a button
+                console.log(map);
+            },
+
+            onRegionClick: function (element, code, region) {
+                console.log("Selected region: " + region);
+
+                setRegionColor(code, waitingColor);
+
+                const srvUrl = (async ? "nio/" : "") + "service/" + study + "/" + code + "?timeout=" + timeout;
+                jQuery.ajax({
+                    url: srvUrl,
+                    method: "GET"
+                }).done(function (rsp) {
+                    // Actual processing of response
+                    const colorSchema = rsp['colorSchema'];
+                    const colorValue = rsp['colorValue'];
+
+                    unsetRegionColor(code);
+                    setRegionColorWithSchema(colorSchema, code, colorValue);
+
+                    const pinValue = rsp['pinValue'];
+                    if (pinValue != null) {
+                        setRegionPin(code, pinValue);
+                    }
+                });
+            }
+        });
+
+        return vMap
+    }
+
+    function setRegionColorWithSchema(colorSchema, code, colorValue) {
+        let finalColor;
+        // simple blue-red colors
+        if (colorSchema === 'temperature') {
+            if (colorValue > -1 && colorValue < 1) {
+                finalColor = fullColorHex(255, 255, 255);
+            }
+            if (colorValue < 0) {
+                const value = Number(-colorValue * 10).toFixed(0);
+                finalColor = fullColorHex(20, 50, 255 - value);
+            } else {
+                const value = Number(colorValue * 10).toFixed(0);
+                finalColor = fullColorHex(255 - value, 50, 20);
+            }
+            console.log(colorSchema, code, finalColor);
+            setRegionColor(code, finalColor);
+        } else {
+            setData(code, colorValue);
+        }
+    }
+
+    function updateStatus(status) {
+        let jdbcUsed = status['jdbc']['poolUsed'];
+        let jdbcSize = status['jdbc']['poolSize'];
+        let jdbcPercents = jdbcUsed * 100 / jdbcSize;
+
+        jQuery("#jdbc-pool-usage")
+            .text("" + jdbcUsed + "/" + jdbcSize);
+        jQuery("#jdbc-pool-usage-progress")
+            .css("width", "" + jdbcPercents + "%");
+        jQuery("#jdbc-pool-queue-size")
+            .text(status['jdbc']['poolQueueSize']);
+
+        let r2dbcUsed = status['r2dbc']['poolUsed'];
+        let r2dbcSize = status['r2dbc']['poolSize'];
+        let r2dbcPercents = r2dbcUsed * 100 / r2dbcSize;
+
+        jQuery("#r2dbc-pool-usage")
+            .text("" + r2dbcUsed + "/" + r2dbcSize);
+        jQuery("#r2dbc-pool-usage-progress")
+            .css("width", "" + r2dbcPercents + "%");
+        jQuery("#r2dbc-pool-queue-size")
+            .text(status['r2dbc']['poolQueueSize']);
+
+
+        jQuery("#active-req")
+            .text(status['activeRequests']);
+    }
+
+    if (!!window.EventSource) {
+        const eventSource = new EventSource("/status");
+        window.onbeforeunload = function(){
+            eventSource.close();
+        };
+        eventSource.onmessage = function (e) {
+            const event = JSON.parse(e.data);
+            updateStatus(event);
+        };
+    } else {
+        console.warn('Your browser does not support Server-Sent Events');
+    }
+</script>
+
+</body>
+</html>

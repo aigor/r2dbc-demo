@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.aigor.r2dbc.demo</groupId>
+	<artifactId>r2dbc-demo-parent</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>R2DBC Demo Project</name>
+	<description>Demo project for R2DBC</description>
+
+	<modules>
+		<module>r2dbc-presto</module>
+		<module>r2dbc-webapp</module>
+	</modules>
+
+</project>

@@ -1,0 +1,15 @@
+version: '2.3'
+
+services:
+  super-app:
+    image: "r2dbc-webapp:0.0.1"
+    hostname: "r2dbc-webapp"
+    environment:
+      WORKER_JDBC_SIZE: 8
+      WORKER_R2DBC_SIZE: 4
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/application"
+    ports:
+      - 8080:8080
+    mem_limit: 512M
+    depends_on:
+      - postgres

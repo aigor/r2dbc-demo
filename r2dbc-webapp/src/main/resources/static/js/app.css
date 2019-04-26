@@ -1,0 +1,16 @@
+.status-block {
+    width: 100%;
+}
+
+.status-block div {
+    display: inline-block;
+    height: 1.5em;
+}
+
+.pool-status {
+    min-width: 230px;
+}
+
+.pool-queue {
+    padding-left: 1.5em;
+}

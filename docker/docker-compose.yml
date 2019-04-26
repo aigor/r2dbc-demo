@@ -1,0 +1,15 @@
+version: '2.3'
+
+services:
+  postgres:
+    image: "postgres:11.1"
+    hostname: "postgres"
+    environment:
+      POSTGRES_DB: application
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - "./postgres:/docker-entrypoint-initdb.d"
+    mem_limit: 512M
