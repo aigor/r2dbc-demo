@@ -33,11 +33,15 @@ public class AppConfiguration {
     @Bean
     public DatabaseFacade databaseFacade(
         UsSalesJdbcRepository usSalesJdbcRepository,
-        UsSalesR2dbcRepository usSalesR2dbcRepository
+        UsSalesR2dbcRepository usSalesR2dbcRepository,
+        @Qualifier("jdbcScheduler") Scheduler jdbcScheduler,
+        @Qualifier("r2dbcScheduler") Scheduler r2dbcScheduler
     ) {
         return new DatabaseFacade(
             usSalesJdbcRepository,
-            usSalesR2dbcRepository
+            usSalesR2dbcRepository,
+            jdbcScheduler,
+            r2dbcScheduler
         );
     }
 

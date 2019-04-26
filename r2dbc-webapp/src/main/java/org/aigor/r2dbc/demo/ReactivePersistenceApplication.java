@@ -105,7 +105,6 @@ public class ReactivePersistenceApplication {
 	private Mono<StudyResultDto> processRequestBlocking(StudyRequestDto studyRequest) {
 		return Mono.fromCallable(() -> dbFacade
 					.resolvePersistedData(studyRequest)
-					.subscribeOn(jdbcScheduler)
 					.block())
 			.map(persisted -> StudyResultDto.generic(persisted.getSales(), persisted.getSales())
 			);
@@ -116,7 +115,6 @@ public class ReactivePersistenceApplication {
 	private Mono<StudyResultDto> processRequestReactive(StudyRequestDto studyRequest) {
 			return dbFacade
 				.resolvePersistedData(studyRequest)
-				.subscribeOn(r2dbcScheduler)
 				.map(persisted -> StudyResultDto.generic(persisted.getSales(), persisted.getSales()))
 				.doOnError(e -> log.warn("Error:", e));
 	}
