@@ -36,8 +36,8 @@ public class DatabaseFacade {
     private Mono<UsSalesDataDto> usSalesJdbc(String region) {
         return Mono.fromCallable(() ->
             usSalesJdbcRepository
-            .findById(region)
-            .orElse(null)
+                .findById(region)
+                .orElse(null)
         );
     }
 
