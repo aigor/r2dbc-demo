@@ -15,7 +15,6 @@ public interface UsSalesR2dbcRepository extends R2dbcRepository<UsSalesDataDto, 
     @Query("select * from us_sales_by_districts, pg_sleep(2)")
     Flux<UsSalesDataDto> findAll();
 
-    // Binding parameters are not supported yet by r2dbc-postgres
     @Override
     @Query("select * from us_sales_by_districts, pg_sleep(2) where code=:code")
     Mono<UsSalesDataDto> findById(@Param("code") @NonNull String code);

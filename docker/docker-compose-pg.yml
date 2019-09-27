@@ -4,6 +4,7 @@ services:
   postgres:
     image: "postgres:11.1"
     hostname: "postgres"
+    container_name: "postgres"
     environment:
       POSTGRES_DB: application
       POSTGRES_USER: postgres

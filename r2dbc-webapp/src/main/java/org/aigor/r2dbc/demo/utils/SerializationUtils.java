@@ -7,9 +7,9 @@ public final class SerializationUtils {
     private SerializationUtils() { }
 
     public static StudyRequestDto parseRequest(ServerRequest request) {
-        String study = request.pathVariable("study");
-        String region = request.pathVariable("region");
-        String timeout = request.queryParam("timeout").orElse(null);
+        var study = request.pathVariable("study");
+        var region = request.pathVariable("region");
+        var timeout = request.queryParam("timeout").orElse(null);
         return new StudyRequestDto(study, region, timeout);
     }
 }

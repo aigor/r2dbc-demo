@@ -14,7 +14,7 @@ public final class AppSchedulers {
 
                 @Override
                 public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r);
+                    var thread = new Thread(r);
                     thread.setName(prefix + "-" + id.incrementAndGet());
                     thread.setDaemon(true);
                     return thread;

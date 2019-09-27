@@ -18,7 +18,7 @@ public class H2TradeRepository implements TradeRepository {
 
 	private final R2dbc h2Client;
 
-	public H2TradeRepository() {
+	H2TradeRepository() {
 		H2ConnectionConfiguration conf = H2ConnectionConfiguration.builder()
 			.url("mem:db;DB_CLOSE_DELAY=-1;TRACE_LEVEL_FILE=4")
 			.build();

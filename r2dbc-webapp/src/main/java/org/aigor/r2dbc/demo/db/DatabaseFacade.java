@@ -1,6 +1,5 @@
 package org.aigor.r2dbc.demo.db;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aigor.r2dbc.demo.db.jdbc.UsSalesJdbcRepository;
 import org.aigor.r2dbc.demo.db.r2dbc.UsSalesR2dbcRepository;
@@ -18,7 +17,6 @@ import static java.time.Instant.now;
 @Slf4j
 public class DatabaseFacade {
 
-    // Repositories for different DBs
     private final UsSalesJdbcRepository usSalesJdbcRepository;
     private final UsSalesR2dbcRepository usSalesR2dbcRepository;
 
@@ -37,14 +35,11 @@ public class DatabaseFacade {
         this.r2dbcScheduler = r2dbcScheduler;
     }
 
-    public Mono<UsSalesDataDto> resolvePersistedData(StudyRequestDto request) {
-        switch (request.getStudy()) {
-            case "usa-districts-jdbc":
-                return withTiming(usSalesJdbc(request.getRegion()), "JDBC");
-            case "usa-districts-r2dbc":
-                return withTiming(usSalesR2Dbc(request.getRegion()), "R2DBC");
-            default:
-                return Mono.error(new RuntimeException("Unknown study: " + request.getStudy()));
+    public Mono<UsSalesDataDto> resolvePersistedData(StudyRequestDto request, boolean reactive) {
+        if (reactive) {
+            return withTiming(usSalesR2Dbc(request.getRegion()), "R2DBC");
+        } else {
+            return withTiming(usSalesJdbc(request.getRegion()), "JDBC");
         }
     }
 
@@ -57,18 +52,8 @@ public class DatabaseFacade {
     }
 
     private Mono<UsSalesDataDto> usSalesR2Dbc(String region) {
-        // Can not use findById as Binding parameters is not supported yet for Postgres R2DBC
-
-        // return usSalesR2dbcRepository
-        //   .findById(region)
-        //   .map(UsSalesDataDto::getSales);
-
-        // Used for batched & non-batched mode
         return usSalesR2dbcRepository
-            .findAll()
-            //.doOnNext(r -> log.debug(" [R2DBC -> App]: {}", r))
-            .filter(data -> region.equals(data.getCode()))
-            .next()
+            .findById(region)
             .subscribeOn(r2dbcScheduler)
             .publishOn(r2dbcScheduler);
     }

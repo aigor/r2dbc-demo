@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.r2dbc.core.DatabaseClient;
+import org.springframework.data.r2dbc.core.DefaultReactiveDataAccessStrategy;
+import org.springframework.data.r2dbc.core.ReactiveDataAccessStrategy;
 import org.springframework.data.r2dbc.dialect.PostgresDialect;
-import org.springframework.data.r2dbc.function.DatabaseClient;
-import org.springframework.data.r2dbc.function.DefaultReactiveDataAccessStrategy;
-import org.springframework.data.r2dbc.function.ReactiveDataAccessStrategy;
 import org.springframework.data.r2dbc.repository.support.R2dbcRepositoryFactory;
-import org.springframework.data.relational.core.mapping.RelationalMappingContext;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -53,9 +52,9 @@ public class AppConfiguration {
         @Value("${spring.datasource.password}") String password
     ) {
         // Parse database connection params into R2DBC friendly format
-        String host = url.substring(url.indexOf("//") + 2, url.lastIndexOf(":"));
-        Integer port = Integer.parseInt(url.substring(url.lastIndexOf(":") + 1, url.lastIndexOf("/")));
-        String database = url.substring(url.lastIndexOf("/") + 1);
+        var host = url.substring(url.indexOf("//") + 2, url.lastIndexOf(":"));
+        var port = Integer.parseInt(url.substring(url.lastIndexOf(":") + 1, url.lastIndexOf("/")));
+        var database = url.substring(url.lastIndexOf("/") + 1);
 
         return databaseClient(host, port, database, user, password);
     }
@@ -69,7 +68,7 @@ public class AppConfiguration {
     ) {
         log.info("Reactive Postgres config. Host: '{}', DB: '{}', user: '{}'", host, database, user);
 
-        PostgresqlConnectionFactory connectionFactory =
+        var connectionFactory =
             new PostgresqlConnectionFactory(PostgresqlConnectionConfiguration.builder()
                 .host(host)
                 .port(port)
@@ -90,10 +89,7 @@ public class AppConfiguration {
         DatabaseClient client,
         ReactiveDataAccessStrategy reactiveDataAccessStrategy
     ) {
-        RelationalMappingContext context = new RelationalMappingContext();
-        context.afterPropertiesSet();
-
-        return new R2dbcRepositoryFactory(client, context, reactiveDataAccessStrategy);
+        return new R2dbcRepositoryFactory(client, reactiveDataAccessStrategy);
     }
 
     @Bean

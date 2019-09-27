@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo PATH=$JAVA_HOME/bin:$PATH ./mvnw -f r2dbc-webapp/pom.xml clean package docker:build
+

@@ -1,7 +1,5 @@
 package org.aigor.r2dbc.demo.trade;
 
-import org.aigor.r2dbc.demo.trade.H2TradeRepository;
-import org.aigor.r2dbc.demo.trade.Trade;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 

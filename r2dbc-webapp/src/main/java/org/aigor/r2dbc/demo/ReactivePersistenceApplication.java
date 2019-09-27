@@ -19,7 +19,6 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -38,98 +37,78 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 @SpringBootApplication
 public class ReactivePersistenceApplication {
 
-	// Services
-	private final ThreadPoolExecutor jdbcExecutor;
-	private final ThreadPoolExecutor r2dbcExecutor;
-	private final Scheduler jdbcScheduler;
-	private final Scheduler r2dbcScheduler;
+    // Services
+    private final ThreadPoolExecutor jdbcExecutor;
+    private final ThreadPoolExecutor r2dbcExecutor;
 
-	private final DatabaseFacade dbFacade;
+    private final DatabaseFacade dbFacade;
 
-	@Autowired
-	public ReactivePersistenceApplication(
-		@Qualifier("jdbcWorker") ThreadPoolExecutor jdbcExecutor,
-		@Qualifier("r2dbcWorker") ThreadPoolExecutor r2dbcExecutor,
-		@Qualifier("jdbcScheduler") Scheduler jdbcScheduler,
-		@Qualifier("r2dbcScheduler") Scheduler r2dbcScheduler,
-		DatabaseFacade dbFacade
-	) {
-		this.jdbcExecutor = jdbcExecutor;
-		this.r2dbcExecutor = r2dbcExecutor;
-		this.jdbcScheduler = jdbcScheduler;
-		this.r2dbcScheduler = r2dbcScheduler;
-		this.dbFacade = dbFacade;
-	}
+    @Autowired
+    public ReactivePersistenceApplication(
+        @Qualifier("jdbcWorker") ThreadPoolExecutor jdbcExecutor,
+        @Qualifier("r2dbcWorker") ThreadPoolExecutor r2dbcExecutor,
+        DatabaseFacade dbFacade
+    ) {
+        this.jdbcExecutor = jdbcExecutor;
+        this.r2dbcExecutor = r2dbcExecutor;
+        this.dbFacade = dbFacade;
+    }
 
-	// Statistics
-	private final AtomicInteger activeRequests = new AtomicInteger(0);
+    // Statistics
+    private final AtomicInteger activeRequests = new AtomicInteger(0);
 
-	public static void main(String[] args) {
-		SpringApplication.run(ReactivePersistenceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ReactivePersistenceApplication.class, args);
+    }
 
-	@Bean
-	public RouterFunction<?> routerFunction() {
-		return RouterFunctions
-			.route(
-				GET("/"),
-				request -> ok().render(
-					"index",
-					Rendering.view("index"))
-			).andRoute(
-				GET("/service/{study}/{region}"),
-				request -> ok()
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(
-						withMetrics(processRequestBlocking(parseRequest(request))),
-						StudyResultDto.class)
-			).andRoute(
-				GET("/nio/service/{study}/{region}"),
-				request -> ok()
-					.contentType(MediaType.APPLICATION_JSON)
-					.body(
-						withMetrics(processRequestReactive(parseRequest(request))),
-						StudyResultDto.class)
+    @Bean
+    public RouterFunction<?> routerFunction() {
+        return RouterFunctions
+            .route(
+                GET("/"),
+                request -> ok().render(
+                    "index",
+                    Rendering.view("index"))
+            ).andRoute(
+                GET("/service/{study}/{region}"),
+                request -> ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(
+                        withMetrics(processRequest(parseRequest(request), false)),
+                        StudyResultDto.class)
+            ).andRoute(
+                GET("/nio/service/{study}/{region}"),
+                request -> ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(
+                        withMetrics(processRequest(parseRequest(request), true)),
+                        StudyResultDto.class)
             ).andRoute(
                 GET("/status"),
                 request -> ok()
                     .contentType(MediaType.TEXT_EVENT_STREAM)
                     .body(applicationStatus(), AppStatusDto.class)
-			).andOther(
-				resources("/**", new ClassPathResource("/static"))
-			);
-	}
+            ).andOther(
+                resources("/**", new ClassPathResource("/static"))
+            );
+    }
 
-	// --- Blocking handling ---------------------------------------------------
+    private Mono<StudyResultDto> processRequest(StudyRequestDto studyRequest, boolean reactive) {
+        return dbFacade
+            .resolvePersistedData(studyRequest, reactive)
+            .map(persisted -> StudyResultDto.generic(persisted.getSales(), persisted.getSales()));
+    }
 
-	private Mono<StudyResultDto> processRequestBlocking(StudyRequestDto studyRequest) {
-		return Mono.fromCallable(() -> dbFacade
-					.resolvePersistedData(studyRequest)
-					.block())
-			.map(persisted -> StudyResultDto.generic(persisted.getSales(), persisted.getSales())
-			);
-	}
+    // --- App's metrics -------------------------------------------------------
 
-	// ---- Async handling -----------------------------------------------------
+    private Flux<AppStatusDto> applicationStatus() {
+        return Flux.interval(Duration.ofMillis(250))
+            .map(i -> toAppStatus(jdbcExecutor, r2dbcExecutor, activeRequests.get()));
+    }
 
-	private Mono<StudyResultDto> processRequestReactive(StudyRequestDto studyRequest) {
-			return dbFacade
-				.resolvePersistedData(studyRequest)
-				.map(persisted -> StudyResultDto.generic(persisted.getSales(), persisted.getSales()))
-				.doOnError(e -> log.warn("Error:", e));
-	}
-
-	// --- App's metrics -------------------------------------------------------
-
-	private Flux<AppStatusDto> applicationStatus() {
-		return Flux.interval(Duration.ofMillis(250))
-				.map(i -> toAppStatus(jdbcExecutor, r2dbcExecutor, activeRequests.get())
-		);
-	}
-
-	private Mono<StudyResultDto> withMetrics(Mono<StudyResultDto> stream) {
-		return stream
-			.doOnSubscribe(s -> activeRequests.incrementAndGet())
-			.doFinally(s -> activeRequests.decrementAndGet());
-	}
+    private Mono<StudyResultDto> withMetrics(Mono<StudyResultDto> stream) {
+        return stream
+            .doOnSubscribe(s -> activeRequests.incrementAndGet())
+            .doFinally(s -> activeRequests.decrementAndGet());
+    }
 }
