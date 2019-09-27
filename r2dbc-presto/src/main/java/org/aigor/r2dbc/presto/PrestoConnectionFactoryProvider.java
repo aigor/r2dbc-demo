@@ -7,12 +7,17 @@ import io.r2dbc.spi.ConnectionFactoryProvider;
 public class PrestoConnectionFactoryProvider implements ConnectionFactoryProvider {
 
     @Override
+    public String getDriver() {
+        return "PrestoDB";
+    }
+
+    @Override
     public ConnectionFactory create(ConnectionFactoryOptions connectionFactoryOptions) {
-        return null;
+        return new PrestoConnectionFactory();
     }
 
     @Override
     public boolean supports(ConnectionFactoryOptions connectionFactoryOptions) {
-        return false;
+        return true;
     }
 }

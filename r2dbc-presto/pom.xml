@@ -26,9 +26,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<r2dbc-spi.version>1.0.0.M7</r2dbc-spi.version>
-
-		<reactor.version>Californium-SR3</reactor.version>
+		<reactor.version>Dysprosium-RELEASE</reactor.version>
+		<r2dbc.version>Arabba-RC1</r2dbc.version>
 
 		<slf4j.version>1.7.25</slf4j.version>
 		<testcontainers.version>1.10.6</testcontainers.version>
@@ -43,6 +42,15 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+			<dependency>
+				<groupId>io.r2dbc</groupId>
+				<artifactId>r2dbc-bom</artifactId>
+				<version>${r2dbc.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
 			<dependency>
 				<groupId>org.junit</groupId>
 				<artifactId>junit-bom</artifactId>
@@ -68,7 +76,10 @@
 		<dependency>
 			<groupId>io.r2dbc</groupId>
 			<artifactId>r2dbc-spi</artifactId>
-			<version>${r2dbc-spi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.r2dbc</groupId>
+			<artifactId>r2dbc-pool</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -92,12 +103,6 @@
 		<dependency>
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.r2dbc</groupId>
-			<artifactId>r2dbc-spi-test</artifactId>
-			<version>${r2dbc-spi.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
