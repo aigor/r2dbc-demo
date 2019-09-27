@@ -1,3 +1,3 @@
 # Demo R2DBC web-application
 
-Prepared for JEEConf 2019
+Prepared for JEEConf 2019 & Java Day Odesa 2019
