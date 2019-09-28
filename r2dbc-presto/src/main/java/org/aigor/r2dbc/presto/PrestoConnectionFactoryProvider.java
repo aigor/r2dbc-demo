@@ -13,11 +13,15 @@ public class PrestoConnectionFactoryProvider implements ConnectionFactoryProvide
 
     @Override
     public ConnectionFactory create(ConnectionFactoryOptions connectionFactoryOptions) {
-        return new PrestoConnectionFactory();
+        return new PrestoConnectionFactory(optionsToConfig(connectionFactoryOptions));
     }
 
     @Override
     public boolean supports(ConnectionFactoryOptions connectionFactoryOptions) {
         return true;
+    }
+
+    private PrestoConnectionConfiguration optionsToConfig(ConnectionFactoryOptions options) {
+        return null;
     }
 }
