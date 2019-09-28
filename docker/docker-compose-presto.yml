@@ -1,7 +1,7 @@
 version: '2.3'
 
 services:
-  postgres:
+  presto:
     image: "starburstdata/presto:latest"
     hostname: "presto"
     container_name: "presto"

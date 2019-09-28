@@ -38,7 +38,7 @@ public class PrestoConnection implements Connection {
         return Mono.empty();
     }
 
-    // --- Not implemented
+    // --- Not implemented --------------------
 
     @Override
     public Batch createBatch() {

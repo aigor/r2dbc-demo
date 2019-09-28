@@ -8,11 +8,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PrestoRow implements Row {
     private final PrestoRowMetadata prestoRowMetadata;
-    private final List<Object> data;
+    private final List<Object> rowData;
 
     @Override
     public <T> T get(int index, Class<T> type) {
-        return type.cast(data.get(index));
+        return type.cast(rowData.get(index));
     }
 
     @Override

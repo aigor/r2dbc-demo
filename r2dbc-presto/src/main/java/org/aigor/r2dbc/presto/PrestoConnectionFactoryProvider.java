@@ -22,6 +22,7 @@ public class PrestoConnectionFactoryProvider implements ConnectionFactoryProvide
     }
 
     private PrestoConnectionConfiguration optionsToConfig(ConnectionFactoryOptions options) {
+        // TODO: Map options to Presto configuration
         return null;
     }
 }

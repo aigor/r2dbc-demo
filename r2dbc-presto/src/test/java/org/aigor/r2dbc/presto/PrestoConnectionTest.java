@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 class PrestoConnectionTest implements PrestoSampleQueries {
 
     @Test
-    void simpleUsage() {
+    void simpleUsageExample() {
         var prestoConnectionFactory =
             new PrestoConnectionFactory(PrestoConnectionConfiguration.builder()
                 .host("localhost")

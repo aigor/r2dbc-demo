@@ -2,6 +2,7 @@ package org.aigor.r2dbc.presto;
 
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryMetadata;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aigor.r2dbc.presto.model.DbInfo;
 import org.aigor.r2dbc.presto.model.JsonBodyHandler;
@@ -14,20 +15,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.aigor.r2dbc.presto.PrestoUtils.uriForQueryPath;
 
 @Slf4j
+@RequiredArgsConstructor
 public class PrestoConnectionFactory implements ConnectionFactory {
     private final PrestoConnectionConfiguration config;
-    private ExecutorService prestoHttpClientExecutor;
-
-    public PrestoConnectionFactory(PrestoConnectionConfiguration config) {
-        this.config = config;
-        this.prestoHttpClientExecutor = Executors.newFixedThreadPool(2);
-    }
 
     @Override
     public ConnectionFactoryMetadata getMetadata() {
@@ -52,7 +46,6 @@ public class PrestoConnectionFactory implements ConnectionFactory {
     private HttpClient buildHttpClient() {
         return HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(30))
-            .executor(prestoHttpClientExecutor)
             .followRedirects(HttpClient.Redirect.NEVER)
             .version(HttpClient.Version.HTTP_1_1)
             .build();
