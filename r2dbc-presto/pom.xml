@@ -27,7 +27,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<reactor.version>Dysprosium-RELEASE</reactor.version>
-		<r2dbc.version>Arabba-RC1</r2dbc.version>
+		<r2dbc.version>Arabba-RC2</r2dbc.version>
 
 		<slf4j.version>1.7.25</slf4j.version>
 		<testcontainers.version>1.10.6</testcontainers.version>
