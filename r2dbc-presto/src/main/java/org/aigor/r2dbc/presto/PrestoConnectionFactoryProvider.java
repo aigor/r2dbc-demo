@@ -8,7 +8,7 @@ public class PrestoConnectionFactoryProvider implements ConnectionFactoryProvide
 
     @Override
     public String getDriver() {
-        return "PrestoDB";
+        return "Presto";
     }
 
     @Override

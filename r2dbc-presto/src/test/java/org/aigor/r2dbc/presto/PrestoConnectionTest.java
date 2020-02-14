@@ -7,6 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.time.Duration.between;
+import static java.time.Instant.now;
+
 @Slf4j
 class PrestoConnectionTest implements PrestoSampleQueries {
 
@@ -21,6 +27,8 @@ class PrestoConnectionTest implements PrestoSampleQueries {
                 .schema("tiny")
                 .build());
 
+        AtomicReference<Instant> startTime = new AtomicReference<>();
+
         Mono.from(prestoConnectionFactory.create())
             .doOnNext(conn ->
                 log.info("Presto Version: {}", conn.getMetadata().getDatabaseVersion()))
@@ -28,6 +36,8 @@ class PrestoConnectionTest implements PrestoSampleQueries {
                 conn.createStatement(HELLO_QUERY).execute())
             .flatMap(result -> result.map(this::rowToString))
             .doOnNext(row -> log.info("[DATA ROW] {}", row))
+            .doOnSubscribe(_s -> startTime.set(now()))
+            .doOnComplete(() -> log.info("Execution took {}", between(startTime.get(), now())))
             .then()
             .block();
     }
