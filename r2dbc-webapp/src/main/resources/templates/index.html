@@ -38,6 +38,9 @@
         </div>
     </div>
     <div class="jdbc-pool-queue">
+        <p>db: <b><a id="jdbc-pool-db-queries">0</a></b></p>
+    </div>
+    <div class="jdbc-pool-queue">
         <p>queue: <b><a id="jdbc-pool-queue-size">0</a></b></p>
     </div>
 
@@ -50,12 +53,17 @@
         </div>
     </div>
     <div class="r2dbc-pool-queue">
+        <p>db: <b><a id="r2dbc-pool-db-queries">0</a></b></p>
+    </div>
+    <div class="r2dbc-pool-queue">
         <p>queue: <b><a id="r2dbc-pool-queue-size">0</a></b></p>
     </div>
 
+    <!--
     <div class="pool-queue">
         <p>serving req: <a id="active-req">0</a></p>
     </div>
+    -->
 </div>
 
 <div id="vmap-container" align="center">
@@ -212,6 +220,8 @@
             .text("" + jdbcUsed + "/" + jdbcSize);
         jQuery("#jdbc-pool-usage-progress")
             .css("width", "" + jdbcPercents + "%");
+        jQuery("#jdbc-pool-db-queries")
+            .text(status['jdbc']['runningDbQueries']);
         jQuery("#jdbc-pool-queue-size")
             .text(status['jdbc']['poolQueueSize']);
 
@@ -223,12 +233,13 @@
             .text("" + r2dbcUsed + "/" + r2dbcSize);
         jQuery("#r2dbc-pool-usage-progress")
             .css("width", "" + r2dbcPercents + "%");
+        jQuery("#r2dbc-pool-db-queries")
+            .text(status['r2dbc']['runningDbQueries']);
         jQuery("#r2dbc-pool-queue-size")
             .text(status['r2dbc']['poolQueueSize']);
 
-
-        jQuery("#active-req")
-            .text(status['activeRequests']);
+        //jQuery("#active-req")
+        //    .text(status['activeRequests']);
     }
 
     if (!!window.EventSource) {

@@ -103,7 +103,7 @@ public class ReactivePersistenceApplication {
 
     private Flux<AppStatusDto> applicationStatus() {
         return Flux.interval(Duration.ofMillis(250))
-            .map(i -> toAppStatus(jdbcExecutor, r2dbcExecutor, activeRequests.get()));
+            .map(i -> toAppStatus(jdbcExecutor, r2dbcExecutor, dbFacade, activeRequests.get()));
     }
 
     private Mono<StudyResultDto> withMetrics(Mono<StudyResultDto> stream) {

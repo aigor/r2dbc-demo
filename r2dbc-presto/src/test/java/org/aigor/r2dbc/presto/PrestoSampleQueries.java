@@ -3,7 +3,12 @@ package org.aigor.r2dbc.presto;
 interface PrestoSampleQueries {
 
     String HELLO_QUERY =
-        "select 1 as day, 'November' as month, 'Kyiv' as city, 'Devoxx Ukraine' as event";
+        "select " +
+            "15 as day, " +
+            "'February' as month, " +
+            "'Lviv' as city, " +
+            "'Java Day Lviv' as event";
+
 
     String TPC_H_QUERY_5 =
         "SELECT\n" +

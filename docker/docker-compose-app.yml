@@ -5,7 +5,7 @@ services:
     image: "r2dbc-webapp:0.0.1"
     hostname: "r2dbc-webapp"
     environment:
-      WORKER_JDBC_SIZE: 8
+      WORKER_JDBC_SIZE: 4
       WORKER_R2DBC_SIZE: 4
       SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/application"
     ports:

@@ -12,14 +12,6 @@ public class StudyResultDto {
     private final Double colorValue;
     private final String pinValue;
 
-    private StudyResultDto(String colorSchema, Double colorValue) {
-        this(colorSchema, colorValue, null);
-    }
-
-    public static StudyResultDto temperature(Double colorValue) {
-        return new StudyResultDto("temperature", colorValue);
-    }
-
     public static StudyResultDto generic(Double colorValue, Object pinValue) {
         return new StudyResultDto("red", colorValue, formatValue(pinValue));
     }

@@ -13,5 +13,6 @@ public class AppStatusDto {
         private final int poolSize;
         private final int poolUsed;
         private final int poolQueueSize;
+        private final int runningDbQueries;
     }
 }

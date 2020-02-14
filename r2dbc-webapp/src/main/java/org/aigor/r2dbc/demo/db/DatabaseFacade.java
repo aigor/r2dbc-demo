@@ -1,5 +1,6 @@
 package org.aigor.r2dbc.demo.db;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.aigor.r2dbc.demo.db.jdbc.UsSalesJdbcRepository;
 import org.aigor.r2dbc.demo.db.r2dbc.UsSalesR2dbcRepository;
@@ -9,6 +10,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.time.Duration.between;
@@ -22,6 +24,11 @@ public class DatabaseFacade {
 
     private final Scheduler jdbcScheduler;
     private final Scheduler r2dbcScheduler;
+
+    @Getter
+    private final AtomicInteger jdbcRunningQueries = new AtomicInteger(0);
+    @Getter
+    private final AtomicInteger r2dbcRunningQueries = new AtomicInteger(0);
 
     public DatabaseFacade(
         UsSalesJdbcRepository usSalesJdbcRepository,
@@ -44,18 +51,25 @@ public class DatabaseFacade {
     }
 
     private Mono<UsSalesDataDto> usSalesJdbc(String region) {
-        return Mono.fromCallable(() ->
-            usSalesJdbcRepository
-                .findById(region)
-                .orElse(null)
-        ).subscribeOn(jdbcScheduler);
+        return Mono.fromCallable(() -> {
+            try {
+                jdbcRunningQueries.incrementAndGet();
+                return usSalesJdbcRepository
+                    .findById(region)
+                    .orElse(null);
+            } finally {
+                jdbcRunningQueries.decrementAndGet();
+            }
+        }).subscribeOn(jdbcScheduler);
     }
 
     private Mono<UsSalesDataDto> usSalesR2Dbc(String region) {
         return usSalesR2dbcRepository
             .findById(region)
             .subscribeOn(r2dbcScheduler)
-            .publishOn(r2dbcScheduler);
+            .publishOn(r2dbcScheduler)
+            .doOnSubscribe(s -> r2dbcRunningQueries.incrementAndGet())
+            .doFinally(s -> r2dbcRunningQueries.decrementAndGet());
     }
 
     private static <T> Mono<T> withTiming(Mono<T> publisher, String repoType) {
